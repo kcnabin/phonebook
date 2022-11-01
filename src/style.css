@@ -1,0 +1,118 @@
+body, .root, h2 {
+  padding: 0;
+  margin: 0;
+}
+
+.root {
+  padding: 20px;
+  border: 1px solid black;
+}
+
+#root, .title {
+  display: flex;
+  justify-content: center;
+}
+
+.title {
+  color: grey;
+  /*padding: 10px 0;*/
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+body {
+  background-color: #8EC5FC;
+  background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
+}
+
+.main-body {
+  padding: 24px;
+  border: 1px solid black;
+  margin: 20px auto;
+}
+
+.main-title {
+  text-align: center;
+}
+
+.entry-form {
+  padding-bottom: 40px;
+}
+
+.entry-form > p {
+  display: flex;
+  justify-content: space-between;
+}
+
+.entry-form > p > label {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+#submit-btn {
+  margin-top: 8px;
+}
+
+.search-title {
+  padding: 10px 0;
+  color: #2c405e;
+}
+
+.search-section {
+  padding: 4px 0 12px 0;
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+}
+
+#search-input {
+  margin-top: 8px;
+}
+
+.saved-name {
+  color: grey;
+}
+
+.each-contact {
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+input, input:focus {
+  background-color: #d2e3d1;
+  border: none;
+  padding: 4px 6px;
+  outline-color: grey;
+}
+
+button {
+  font-weight: bold;
+  border: 1px solid black;
+  padding: 4px 6px;
+}
+
+button:hover {
+  background-color: black;
+  color: white;
+}
+
+.contact-name, .contact-no {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 340px) {
+  .entry-form > p {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .each-contact {
+    flex-wrap: wrap;
+  }
+}
+
+
