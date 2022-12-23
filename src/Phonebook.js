@@ -5,14 +5,42 @@ import './style.css'
 const App = () => {
 	const [names, setNames] = useState([])
 	const [newName, setNewName] = useState('')
-	const [numbers, setNumbers] = useState([])
+	
 	const [newNum, setNewNum] = useState('')
 
   const [search, setSearch] = useState(false);
   const [searchedPerson, setSearchedPerson] = useState([]);
 
-	// const baseURL = 'http://localhost:3001/api/persons'
-  const baseURL = 'https://shocking-treat-23163.herokuapp.com/api/persons'
+  const [msg, setMsg] = useState("Loading all contacts from DB")
+
+  const baseURL = 'http://localhost:3001/api/contacts'
+
+  const displayInfo = info => {
+    setMsg(info)
+    setTimeout(() => {
+      setMsg(null)
+    }, 10000)
+  }
+
+  // getting initial saved data from database
+  const getInitData = () => {
+    axios
+      .get(baseURL)
+      .then(res => {
+        // console.log(res)
+        setNames(res.data)
+        setMsg(null)
+      })
+      .catch(e => {
+        displayInfo('Failed to load initial data')
+      })
+  }
+
+  // using effect hook to get initial data when component is mounted
+  useEffect(getInitData, [])
+
+  const handleName = e => setNewName(e.target.value)
+  const handleNumber = e => setNewNum(e.target.value)
 
   // adding name and number after form is submitted
 	const saveContact = e => {
@@ -21,18 +49,18 @@ const App = () => {
     // checking if name or number is already added
     let alreadyAdded = false;
 
-    if (newName == "" || newNum == "") {
-      alert("Must add both name & number");
+    if (newName === "" || newNum === "") {
+      displayInfo("Must add both name & number");
       alreadyAdded = true;
     }
 
-    names.map((person) => {
-      if (person.name == newName) {
-        alert(`${newName} already added! Can't add contact with same name!`);
+    names.forEach(person => {
+      if (person.name === newName) {
+        displayInfo(`${newName} already added! Can't add contact with same name!`);
         alreadyAdded = true;
       }
-      if (person.number == newNum) {
-        alert(`Number already added to other person!`);
+      if (person.number === newNum) {
+        displayInfo(`'${newNum}' already added to other person!`);
         alreadyAdded = true;
       }
     });
@@ -46,11 +74,15 @@ const App = () => {
         number: num
       }
 
+      displayInfo('Adding contact to database...')
+
       axios
         .post(baseURL, contactObject)
         .then(res => {
           // console.log(res)
           setNames(names.concat(res.data))
+
+          displayInfo('Contact saved to Database')
 
           // clearing input area and onChange state
           document.getElementById('nameInput').value = ''
@@ -58,27 +90,18 @@ const App = () => {
           setNewName('')
           setNewNum('')
         })
+        .catch(e => {
+          console.log(e)
+          displayInfo('Error saving contact!')
+        })
     }	
-	}
-
-  // getting initial saved data from database
-	const getInitData = () => {
-		axios
-			.get(baseURL)
-			.then(res => {
-				// console.log(res)
-				setNames(res.data)
-			})
-			.catch(e => {
-				alert('Failed to load initial data')
-			})
 	}
 
   // searching for entered name
   const searchPerson = (e) => {
     setSearch(true);
     let value = e.target.value.toLowerCase();
-    if (value == "") {
+    if (value === "") {
       setSearch(false);
       setSearchedPerson([]);
       return;
@@ -93,25 +116,21 @@ const App = () => {
 
   // deleting clicked contacts
 	const deleteContactOf = id => {
-    // let delURL = `http://localhost:3001/api/persons/${id}`
-		// let delURL = `http://localhost:3001/contacts/${id}`
-    let delURL = `https://shocking-treat-23163.herokuapp.com/api/persons/${id}`
+    let delURL = `${baseURL}/${id}`
 
-		axios
-			.delete(delURL)
-			.then(res => {
-				setNames(names.filter(name => name.id != id))
-			})
-			.catch(e => {
-				alert(`Error! Can't connect to database`)
-			})
+    if (window.confirm('Do you want to delete contact?')) {
+  		axios
+  			.delete(delURL)
+  			.then(res => {
+  				setNames(names.filter(name => name.id !== id))
+          displayInfo('Deleted contact successfully!')
+          setSearch(false)
+  			})
+  			.catch(e => {
+  				displayInfo(`Error deleting contact`)
+  			})
+    }
 	}
-
-  // using effect hook to get initial data when component is mounted
-	useEffect(getInitData, [])
-
-	const handleName = e => setNewName(e.target.value)
-	const handleNumber = e => setNewNum(e.target.value)
 
 	return (
 		<div className="main-body">
@@ -119,17 +138,30 @@ const App = () => {
         <Title text="Nabin's Phonebook"/>
       </div>
 			
-
-      <InputArea saveContact={saveContact} 
-                 handleName={handleName} 
-                 handleNumber={handleNumber} 
+      <InputArea 
+        saveContact={saveContact} 
+        handleName={handleName} 
+        handleNumber={handleNumber} 
       />
+
+      <DisplayInfo msg={msg} />
 
       <SearchArea searchPerson={searchPerson} />
 
-			<AllContacts contacts={search ? searchedPerson : names} deleteContactOf={deleteContactOf} />
+			<AllContacts 
+        contacts={search ? searchedPerson : names} 
+        deleteContactOf={deleteContactOf} 
+      />
+
 		</div>
 	)
+}
+
+const DisplayInfo = ({ msg }) => {
+  if (msg) {
+    return <h3 id="message">{msg}</h3>
+  }
+  return
 }
 
 const Title = ({ text }) => {
@@ -141,13 +173,26 @@ const InputArea = ({ saveContact, handleName, handleNumber}) => {
     <form onSubmit={saveContact} className="entry-form" >
       <p>
         <label htmlFor="nameInput">Your Name:</label>
-        <input type='text' onChange={handleName} id='nameInput' /> 
+        <input 
+          type='text' 
+          onChange={handleName} 
+          id='nameInput'
+        /> 
       </p>
+
       <p>
         <label htmlFor="numInput">Mobile No:</label>
-        <input type='text' onChange={handleNumber} id='numInput' /> 
+        <input 
+          type='text' 
+          onChange={handleNumber} 
+          id='numInput'
+        /> 
       </p>
-      <button type='submit' id="submit-btn">Add Contact</button>
+      <button 
+        type='submit' 
+        id="submit-btn">
+        Add Contact
+      </button>
     </form>
   )
 }
@@ -160,7 +205,11 @@ const SearchArea = ({ searchPerson }) => {
       </div>
       <div className="search-section">
         <label htmlFor="search-input">Search by Name</label>
-        <input onChange={searchPerson} id='search-input'/>
+        <input
+          type="text"
+          onChange={searchPerson} 
+          id='search-input'
+        />
       </div>
       
     </div>
@@ -169,9 +218,15 @@ const SearchArea = ({ searchPerson }) => {
 
 const AllContacts = ({ contacts, deleteContactOf }) => {
 	return (
-		contacts.map(contact => {
-			return (<EachContact contact={contact} deleteContact={() => deleteContactOf(contact.id)} key={contact.number} />)
-		})
+
+  		contacts.map(contact => {
+  			return (
+          <EachContact 
+            contact={contact} 
+            deleteContact={() => deleteContactOf(contact.id)} 
+            key={contact.number} 
+          />)
+  		})
 	)
 }
 

@@ -36,7 +36,7 @@ body {
 }
 
 .entry-form {
-  padding-bottom: 40px;
+  padding-bottom: 20px;
 }
 
 .entry-form > p {
@@ -102,6 +102,11 @@ button:hover {
 .contact-name, .contact-no {
   display: flex;
   align-items: center;
+}
+
+#message {
+  text-decoration: underline;
+  color: #bd543c;
 }
 
 @media (max-width: 340px) {
